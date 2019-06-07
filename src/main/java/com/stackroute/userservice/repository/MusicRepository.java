@@ -7,6 +7,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+
+//Repository class for handling the service layer
 @Repository
 public interface MusicRepository extends JpaRepository<Music, Integer> {
 

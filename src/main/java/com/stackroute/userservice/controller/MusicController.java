@@ -17,7 +17,7 @@ import java.util.List;
 
 @RestController
 //@PropertySource("application.properties")
-@RequestMapping(value="/api/v1")
+@RequestMapping(value = "/api/v1")
 public class MusicController {
 
     @Autowired
@@ -33,8 +33,9 @@ public class MusicController {
     }
 
 
+    //handler method to insert and save track
     @ApiOperation(value = "Saves track in database")
-    @PostMapping("/music")
+    @PostMapping("/track")
     public ResponseEntity<Music> addTracks(@RequestBody Music music) throws TrackAlreadyExistException {
         ResponseEntity responseEntity;
         try {
@@ -48,16 +49,16 @@ public class MusicController {
         return responseEntity;
     }
 
-    //
+    //handler method to get all the tracks inside the database
     @ApiOperation(value = "Gets all tracks from database")
-    @GetMapping("/display")
+    @GetMapping("/tracks")
     public ResponseEntity<List<Music>> getAllMusic() throws TrackNotFoundException {
         ResponseEntity responseEntity;
         try {
             List<Music> music = musicService.getAllMusic();
-            responseEntity = new ResponseEntity<List<Music>>(music, HttpStatus.OK);
+            responseEntity = new ResponseEntity<List<Music>>(music, HttpStatus.FOUND);
         } catch (TrackNotFoundException ex) {
-            responseEntity = new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
+            responseEntity = new ResponseEntity<String>(ex.getMessage(), HttpStatus.NOT_FOUND);
             ex.printStackTrace();
 
         }
@@ -67,15 +68,16 @@ public class MusicController {
     @Value("${del_msg}")
     private String del_msg;
 
+    //handler method to update comments in a particular track
     @ApiOperation(value = "Update comment of a track")
-    @PutMapping("/music/{id}")
+    @PutMapping("/track/{id}")
     public ResponseEntity<?> updateTrack(@RequestBody Music music) throws TrackNotFoundException {
         ResponseEntity responseEntity;
         try {
             Music music1 = musicService.updateComment(music);
-            return new ResponseEntity<String>("successfully", HttpStatus.CREATED);
+            return new ResponseEntity<String>("successfully", HttpStatus.OK);
         } catch (TrackNotFoundException ex) {
-            responseEntity = new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
+            responseEntity = new ResponseEntity<String>(ex.getMessage(), HttpStatus.NO_CONTENT);
             //ex.printStackTrace();
             //throw ex;
         }
@@ -83,22 +85,52 @@ public class MusicController {
     }
 
 
+    //handler method to delete tracks from the database
     @ApiOperation(value = "delete track from database")
-    @DeleteMapping("/music/{id}")
+    @DeleteMapping("/track/{id}")
     public ResponseEntity<String> deleteTracks(@PathVariable int id) {
-        musicService.deleteMusic(id);
-        return new ResponseEntity<String>("Success", HttpStatus.OK);
-    }
+        ResponseEntity responseEntity;
+        try {
+            musicService.deleteMusic(id);
+            return new ResponseEntity<String>("Success", HttpStatus.GONE);
+        }catch (TrackNotFoundException ex) {
+            responseEntity = new ResponseEntity<String>(ex.getMessage(), HttpStatus.NO_CONTENT);
+            //ex.printStackTrace();
+            //throw ex;
+        }
+            return responseEntity;
+        }
 
+
+//  @DeleteMapping("/music/{id}")
+//    public ResponseEntity<String> deleteMusic(@PathVariable int id) {
+//        ResponseEntity responseEntity = null;
+//        try {
+//            trackService.deleteMusic(id);
+//            return new ResponseEntity<>("successs", HttpStatus.OK);
+//            //return new ResponseEntity<Track>(trackService.deleteMusic(id), HttpStatus.OK);
+//        } catch (TrackNotFoundException ex) {
+//            responseEntity = new ResponseEntity<String>(ex.getMessage(), HttpStatus.CONFLICT);
+//            ex.getMessage();
+//        }
+//        catch (Exception e)
+//        {
+//            e.getMessage();
+//        }
+//        return responseEntity;
+//    }
+
+
+    //handler methods to search by name from the database
     @ApiOperation(value = "search by name from database")
-    @GetMapping("/music/{name}")
+    @GetMapping("/track/{name}")
     public ResponseEntity<List<Music>> searchByName(@PathVariable String name) throws TrackNotFoundException {
         ResponseEntity responseEntity;
         try {
             List<Music> music = musicService.searchByName(name);
-            responseEntity = new ResponseEntity<List<Music>>(music, HttpStatus.OK);
+            responseEntity = new ResponseEntity<List<Music>>(music, HttpStatus.FOUND);
         } catch (TrackNotFoundException ex) {
-            responseEntity = new ResponseEntity(ex.getMessage(), HttpStatus.CONFLICT);
+            responseEntity = new ResponseEntity(ex.getMessage(), HttpStatus.NOT_FOUND);
         }
         return responseEntity;
 

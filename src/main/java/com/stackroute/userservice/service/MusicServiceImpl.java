@@ -67,8 +67,13 @@ return music1;
 
 
     @Override
-    public List<Music> deleteMusic(int id) {
+    public List<Music> deleteMusic(int id) throws TrackNotFoundException{
 musicRepository.deleteById(id);
+
+        if(id==0)
+        {
+            throw new TrackNotFoundException("music not found");
+        }
         return null;
     }
 
